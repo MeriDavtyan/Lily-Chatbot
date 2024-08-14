@@ -1,20 +1,26 @@
 import openai
 import streamlit as st
+import os
+from PIL import Image
 
-logo_path = "/Users/copa/Desktop/CHATBOT API/8593225.png"
-lily_img = "/Users/copa/Desktop/CHATBOT API/lily_TM_color_RGB.png"
-# Streamlit app layout and styling
+logo = '/Users/copa/Desktop/chatbot/Lily-Chatbot/img/logo-blue.7403842f_Z1Ttmcp.png'
 st.set_page_config(
-    page_title="Bot",
-    page_icon=":robot_face:",
+    page_title="LiLo",
+    page_icon=logo,
     layout="centered",
     initial_sidebar_state="expanded",
 )
-# Set your OpenAI API key
+
 openai.api_key = "sk-aqCLkscjEfzjIk0IDqoyWeIWh8APj7b8DVrVVjLipbT3BlbkFJ7x6NfaVAp16kUJFr9FDJdpAj5tcs_45yZwIfVGflMA"
 
+images_path = '/Users/copa/Desktop/chatbot/Lily-Chatbot/img/'
+images = os.listdir(images_path)
+
+
 options = [
-    "AI",
+    "LiLo",
+    "Johnny Depp",
+    'Keanu Reeves',
     "Marlon Brando",
     "Meryl Streep",
     "Robert De Niro",
@@ -23,19 +29,18 @@ options = [
     "Tom Hanks",
     "Audrey Hepburn",
     "Viola Davis",
-    "Morgan Freeman",
-    "Johnny Depp",
+    
 ]
 actor = st.sidebar.selectbox("Select the actor", options=options)
 
-# Initialize session state for storing messages
-# Initialize session state variables if they are not already set
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "actor" not in st.session_state:
     st.session_state.actor = actor
 if st.session_state.actor != actor:
     st.session_state.actor = actor
+    sidebar_img_path = os.path.join(images_path, actor.replace(' ', '').lower() + '.jpg')
     st.session_state.messages = [
         {
             "role": "system",
@@ -46,37 +51,6 @@ if st.session_state.actor != actor:
 
 # Function to send a message
 def send_message():
-    """
-    Sends a user message to OpenAI's GPT-3.5 model for processing and stores the response.
-
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    None
-
-    Raises
-    ------
-    KeyError
-        If `st.session_state.user_input` or `st.session_state.messages` is not found.
-
-    Notes
-    -----
-    This function assumes the use of Streamlit's `st.session_state` for managing user input
-    (`st.session_state.user_input`) and accumulated messages (`st.session_state.messages`).
-
-    - If `st.session_state.user_input` contains user input, it appends the user's message
-      to `st.session_state.messages` with 'role' as 'user' and 'content' as the user's input.
-
-    - It sends the accumulated messages to OpenAI's GPT-3.5 model (`model='gpt-3.5-turbo'`)
-      for generating a response. The response is appended to `st.session_state.messages` with
-      'role' as 'assistant' and 'content' as the generated reply.
-
-    - Finally, it clears `st.session_state.user_input` to reset the input field.
-
-    """
     if st.session_state.user_input:
         st.session_state.messages.append(
             {"role": "user", "content": st.session_state.user_input}
@@ -125,30 +99,33 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.title(f"	💬 {actor} Bot")
-a = "Ask me anything and I'll try my best to help!"
-st.markdown(f"<div class='message assistant'>{a}</div>", unsafe_allow_html=True)
+st.title(f"	💬 {actor} ")
+
+col1, col2 = st.columns([5, 1])
+
+with col1:
+    for message in st.session_state.messages:
+        if message["role"] == "user":
+            st.markdown(
+                f"<div class='message user'>{message['content']}</div>",
+                unsafe_allow_html=True,
+            )
+        elif message["role"] == "assistant":
+            st.markdown(
+                f"<div class='message assistant'>{message['content']}</div>",
+                unsafe_allow_html=True,
+            )
 
 
-# Display messages (excluding system message)
-for message in st.session_state.messages:
-    if message["role"] == "user":
-        st.markdown(
-            f"<div class='message user'>{message['content']}</div>",
-            unsafe_allow_html=True,
-        )
-    elif message["role"] == "assistant":
-        st.markdown(
-            f"<div class='message assistant'>{message['content']}</div>",
-            unsafe_allow_html=True,
-        )
+    user_input = st.text_input("You: ", key="user_input", on_change=send_message)
 
-# User input
-user_input = st.text_input("You: ", key="user_input", on_change=send_message)
+    if user_input and user_input.endswith("\n"):
+        send_message()
 
-# Handle pressing Enter to send message
-if user_input and user_input.endswith("\n"):
-    send_message()
+    if st.button("Send"):
+        send_message()
 
-if st.button("Send"):
-    send_message()
+with col2:
+    img_path = os.path.join(images_path, actor.replace(' ', '').lower() + '.jpg')
+    img = Image.open(img_path)
+    st.image(img, width=250)
