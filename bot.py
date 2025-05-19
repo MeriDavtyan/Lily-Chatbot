@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-openai.api_key = "sk-aqCLkscjEfzjIk0IDqoyWeIWh8APj7b8DVrVVjLipbT3BlbkFJ7x6NfaVAp16kUJFr9FDJdpAj5tcs_45yZwIfVGflMA"
+openai.api_key = "api_key"
 
 images_path = '/Users/copa/Desktop/chatbot/Lily-Chatbot/img/'
 images = os.listdir(images_path)
